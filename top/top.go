@@ -19,7 +19,7 @@ type SystemTopStruct struct {
 }
 
 //GetDiskUsage ...
-func (top SystemTopStruct) GetDiskUsage() error {
+func (top *SystemTopStruct) GetDiskUsage() error {
 	var stat syscall.Statfs_t
 	wd, err := os.Getwd()
 	if err != nil {
@@ -92,12 +92,28 @@ func (top *SystemTopStruct) GetCPUUtil() error {
 	return nil
 }
 
+//RetriveInfo retrives all the system top info
+func (top *SystemTopStruct) RetriveInfo() error {
+	err := top.GetCPUUtil()
+	if err != nil {
+		log.Fatal(err.Error())
+		return err
+	}
+	err = top.GetDiskUsage()
+	if err != nil {
+		log.Fatal(err.Error())
+		return err
+	}
+	return nil
+}
+
 //GetTop returns the entire structure
 func (top SystemTopStruct) GetTop() interface{} {
 	return struct {
 		CPUUtil       float64
 		DiskSpaceUsed uint64
-	}{CPUUtil: top.cpuUtil, DiskSpaceUsed: top.diskSpaceUsed}
+		DiskSpaceFree uint64
+	}{CPUUtil: top.cpuUtil, DiskSpaceUsed: top.diskSpaceUsed, DiskSpaceFree: top.diskSpaceFree}
 }
 
 //PrintData prints the content of the structure
