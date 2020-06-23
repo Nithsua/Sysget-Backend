@@ -12,7 +12,8 @@ import (
 
 //SystemTopStruct is used as structure for system usage info
 type SystemTopStruct struct {
-	CPUUtil float64
+	cpuUtil       float64
+	diskSpaceUsed uint64
 }
 
 //getProcData reads /proc/stat and returns total and idle time
@@ -49,7 +50,7 @@ func getProcData() (int64, int64, error) {
 }
 
 //GetCPUUtil calculates CPU utilization with delta of 1 second
-func (top SystemTopStruct) GetCPUUtil() error {
+func (top *SystemTopStruct) GetCPUUtil() error {
 	deltaTT, deltaIT := 0.0, 0.0
 	prevTT, prevIT := 0.0, 0.0
 
@@ -71,6 +72,21 @@ func (top SystemTopStruct) GetCPUUtil() error {
 	if err != nil {
 		return err
 	}
-	top.CPUUtil = cpuUtil
+	top.cpuUtil = cpuUtil
+	// fmt.Println(*top)
 	return nil
+}
+
+//GetTop returns the entire structure
+func (top SystemTopStruct) GetTop() interface{} {
+	return struct {
+		CPUUtil       float64
+		DiskSpaceUsed uint64
+	}{CPUUtil: top.cpuUtil, DiskSpaceUsed: top.diskSpaceUsed}
+}
+
+//PrintData prints the content of the structure
+func (top SystemTopStruct) PrintData() {
+	fmt.Printf("CPU Utilization: %.2f\n", top.cpuUtil)
+	fmt.Printf("Disk Space used: %v\n", top.diskSpaceUsed)
 }
