@@ -15,8 +15,8 @@ type SystemTopStruct struct {
 	CPUUtil float64
 }
 
-//GetProcData reads /proc/stat and returns total and idle time
-func GetProcData() (int64, int64, error) {
+//getProcData reads /proc/stat and returns total and idle time
+func getProcData() (int64, int64, error) {
 	data, err := ioutil.ReadFile("/proc/stat")
 	if err != nil {
 		log.Fatal("Error opening the stat", err.Error())
@@ -49,12 +49,12 @@ func GetProcData() (int64, int64, error) {
 }
 
 //GetCPUUtil calculates CPU utilization with delta of 1 second
-func GetCPUUtil() (float64, error) {
+func (top SystemTopStruct) GetCPUUtil() error {
 	deltaTT, deltaIT := 0.0, 0.0
 	prevTT, prevIT := 0.0, 0.0
 
 	for i := 0; i < 2; i++ {
-		totalTime, idleTime, err := GetProcData()
+		totalTime, idleTime, err := getProcData()
 		// fmt.Println(totalTime, idleTime)
 		if err != nil {
 			os.Exit(1)
@@ -66,7 +66,11 @@ func GetCPUUtil() (float64, error) {
 		prevTT = float64(totalTime)
 		time.Sleep(1 * time.Second)
 	}
-
 	temp := fmt.Sprintf("%.2f", (1-(deltaIT/deltaTT))*100)
-	return strconv.ParseFloat(temp, 64)
+	cpuUtil, err := strconv.ParseFloat(temp, 64)
+	if err != nil {
+		return err
+	}
+	top.CPUUtil = cpuUtil
+	return nil
 }

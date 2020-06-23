@@ -11,8 +11,7 @@ import (
 var topInfo top.SystemTopStruct
 
 func responseUtilData(w http.ResponseWriter, r *http.Request) {
-	temp, err := top.GetCPUUtil()
-	topInfo.CPUUtil = temp
+	err := topInfo.GetCPUUtil()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
