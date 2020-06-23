@@ -10,7 +10,7 @@ import (
 var topInfo top.SystemTopStruct
 
 func responseUtilData(w http.ResponseWriter, r *http.Request) {
-	err := topInfo.GetCPUUtil()
+	err := topInfo.RetriveInfo()
 	// fmt.Println(topInfo.GetTop())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
