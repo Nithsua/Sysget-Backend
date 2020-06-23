@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -14,6 +15,20 @@ import (
 type SystemTopStruct struct {
 	cpuUtil       float64
 	diskSpaceUsed uint64
+	diskSpaceFree uint64
+}
+
+//GetDiskUsage ...
+func (top SystemTopStruct) GetDiskUsage() error {
+	var stat syscall.Statfs_t
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	syscall.Statfs(wd, &stat)
+	top.diskSpaceUsed = (stat.Bavail - stat.Bfree) * uint64(stat.Bsize)
+	top.diskSpaceFree = stat.Bfree * uint64(stat.Bsize)
+	return nil
 }
 
 //getProcData reads /proc/stat and returns total and idle time
