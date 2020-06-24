@@ -13,7 +13,7 @@ import (
 
 //SystemTopStruct is used as structure for system usage info
 type SystemTopStruct struct {
-	cpuPackageUtil float64
+	cpuPackageUtil CPUCoreTop
 	totalDiskSpace uint64
 	diskSpaceUsed  uint64
 	diskSpaceFree  uint64
