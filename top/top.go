@@ -13,9 +13,10 @@ import (
 
 //SystemTopStruct is used as structure for system usage info
 type SystemTopStruct struct {
-	cpuUtil       float64
-	diskSpaceUsed uint64
-	diskSpaceFree uint64
+	cpuUtil        float64
+	totalDiskSpace uint64
+	diskSpaceUsed  uint64
+	diskSpaceFree  uint64
 }
 
 //GetDiskUsage ...
@@ -26,7 +27,8 @@ func (top *SystemTopStruct) GetDiskUsage() error {
 		return err
 	}
 	syscall.Statfs(wd, &stat)
-	top.diskSpaceUsed = (stat.Bavail - stat.Bfree) * uint64(stat.Bsize)
+	top.totalDiskSpace = stat.Blocks * uint64(stat.Bsize)
+	top.diskSpaceUsed = (stat.Blocks - stat.Bfree) * uint64(stat.Bsize)
 	top.diskSpaceFree = stat.Bfree * uint64(stat.Bsize)
 	return nil
 }
@@ -110,14 +112,18 @@ func (top *SystemTopStruct) RetriveInfo() error {
 //GetTop returns the entire structure
 func (top SystemTopStruct) GetTop() interface{} {
 	return struct {
-		CPUUtil       float64
+		CPUUtil        float64
+		TotalDiskSpace uint64
+
 		DiskSpaceUsed uint64
 		DiskSpaceFree uint64
-	}{CPUUtil: top.cpuUtil, DiskSpaceUsed: top.diskSpaceUsed, DiskSpaceFree: top.diskSpaceFree}
+	}{CPUUtil: top.cpuUtil, TotalDiskSpace: top.totalDiskSpace, DiskSpaceUsed: top.diskSpaceUsed, DiskSpaceFree: top.diskSpaceFree}
 }
 
 //PrintData prints the content of the structure
 func (top SystemTopStruct) PrintData() {
-	fmt.Printf("CPU Utilization: %.2f\n", top.cpuUtil)
-	fmt.Printf("Disk Space used: %v\n", top.diskSpaceUsed)
+	fmt.Printf("CPU Utilization: %.2f %% \n", top.cpuUtil)
+	fmt.Printf("Total Disk Space: %.2f MB\n", (float64(top.totalDiskSpace)/1024)/1024)
+	fmt.Printf("Disk Space used: %.2f MB\n", (float64(top.diskSpaceUsed)/1024)/1024)
+	fmt.Printf("Disk Space free: %.2f MB\n", (float64(top.diskSpaceFree)/1024)/1024)
 }
