@@ -21,9 +21,9 @@ type SystemTopStruct struct {
 
 //CPUCoreTop is used to hold information per clock
 type CPUCoreTop struct {
-	coreUtil  float64
-	totalTime uint64
-	idleTime  uint64
+	CoreUtil  float64
+	TotalTime uint64
+	IdleTime  uint64
 }
 
 //GetDiskUsage ...
@@ -96,7 +96,7 @@ func (top *SystemTopStruct) GetCPUUtil() error {
 	if err != nil {
 		return err
 	}
-	top.cpuPackageUtil = cpuUtil
+	top.cpuPackageUtil.CoreUtil = cpuUtil
 	// fmt.Println(*top)
 	return nil
 }
@@ -119,17 +119,16 @@ func (top *SystemTopStruct) RetriveInfo() error {
 //GetTop returns the entire structure
 func (top SystemTopStruct) GetTop() interface{} {
 	return struct {
-		CPUPackageUtil float64
+		CPUPackageUtil CPUCoreTop
 		TotalDiskSpace uint64
-
-		DiskSpaceUsed uint64
-		DiskSpaceFree uint64
+		DiskSpaceUsed  uint64
+		DiskSpaceFree  uint64
 	}{CPUPackageUtil: top.cpuPackageUtil, TotalDiskSpace: top.totalDiskSpace, DiskSpaceUsed: top.diskSpaceUsed, DiskSpaceFree: top.diskSpaceFree}
 }
 
 //PrintData prints the content of the structure
 func (top SystemTopStruct) PrintData() {
-	fmt.Printf("CPU Utilization: %.2f %% \n", top.cpuPackageUtil)
+	fmt.Printf("CPU Utilization: %.2f %% \n", top.cpuPackageUtil.CoreUtil)
 	fmt.Printf("Total Disk Space: %.2f MB\n", (float64(top.totalDiskSpace)/1024)/1024)
 	fmt.Printf("Disk Space used: %.2f MB\n", (float64(top.diskSpaceUsed)/1024)/1024)
 	fmt.Printf("Disk Space free: %.2f MB\n", (float64(top.diskSpaceFree)/1024)/1024)
