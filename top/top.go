@@ -19,6 +19,13 @@ type SystemTopStruct struct {
 	diskSpaceFree  uint64
 }
 
+//CPUCoreTop is used to hold information per clock
+type CPUCoreTop struct {
+	coreUtil  float64
+	totalTime uint64
+	idleTime  uint64
+}
+
 //GetDiskUsage ...
 func (top *SystemTopStruct) GetDiskUsage() error {
 	var stat syscall.Statfs_t
