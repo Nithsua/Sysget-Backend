@@ -41,13 +41,8 @@ func (top *SystemTopStruct) GetDiskUsage() error {
 	return nil
 }
 
-//getProcData reads /proc/stat and returns total and idle time
-func getProcData() (int64, int64, error) {
-	data, err := ioutil.ReadFile("/proc/stat")
-	if err != nil {
-		log.Fatal("Error opening the stat", err.Error())
-	}
-	sysUtil := strings.Split(string(data), "\n")
+func calculateIdleAndTotalTime(procData []byte) (int64, int64, error) {
+	sysUtil := strings.Split(string(procData), "\n")
 
 	cpuData := make([]string, 1, 129)
 
@@ -72,6 +67,18 @@ func getProcData() (int64, int64, error) {
 		return 0, 0, err
 	}
 	return totalTime, idleTime, nil
+
+}
+
+//getProcData reads /proc/stat and returns total and idle time
+func getProcData() ([]byte, error) {
+	data, err := ioutil.ReadFile("/proc/stat")
+	if err != nil {
+		log.Fatal("Error opening the stat", err.Error())
+		return data, err
+	}
+	return data, nil
+
 }
 
 //GetCPUUtil calculates CPU utilization with delta of 1 second
@@ -80,7 +87,11 @@ func (top *SystemTopStruct) GetCPUUtil() error {
 	prevTT, prevIT := 0.0, 0.0
 
 	for i := 0; i < 2; i++ {
-		totalTime, idleTime, err := getProcData()
+		procData, err := getProcData()
+		if err != nil {
+			return err
+		}
+		totalTime, idleTime, err := calculateIdleAndTotalTime(procData)
 		// fmt.Println(totalTime, idleTime)
 		if err != nil {
 			os.Exit(1)
