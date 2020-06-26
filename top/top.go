@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
-	"strconv"
-	"time"
 )
 
 //SystemTopStruct is used as structure for system usage info
@@ -26,38 +23,6 @@ func getProcData() ([]byte, error) {
 		return data, err
 	}
 	return data, nil
-}
-
-//CalculateCPUUtil calculates CPU utilization with delta of 1 second
-func (top *SystemTopStruct) CalculateCPUUtil() error {
-	deltaTT, deltaIT := 0.0, 0.0
-	prevTT, prevIT := 0.0, 0.0
-
-	for i := 0; i < 2; i++ {
-		procData, err := getProcData()
-		if err != nil {
-			return err
-		}
-		totalTime, idleTime, err := calculateIdleAndTotalTime(procData)
-		// fmt.Println(totalTime, idleTime)
-		if err != nil {
-			os.Exit(1)
-		} else {
-			deltaTT = float64(totalTime) - prevTT
-			deltaIT = float64(idleTime) - prevIT
-		}
-		prevIT = float64(idleTime)
-		prevTT = float64(totalTime)
-		time.Sleep(1 * time.Second)
-	}
-	temp := fmt.Sprintf("%.2f", (1-(deltaIT/deltaTT))*100)
-	cpuUtil, err := strconv.ParseFloat(temp, 64)
-	if err != nil {
-		return err
-	}
-	top.cpuPackageUtil.CoreUtil = cpuUtil
-	// fmt.Println(*top)
-	return nil
 }
 
 //RetriveInfo retrives all the system top info
