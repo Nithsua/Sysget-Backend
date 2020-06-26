@@ -26,11 +26,10 @@ func getProcData() ([]byte, error) {
 		return data, err
 	}
 	return data, nil
-
 }
 
-//GetCPUUtil calculates CPU utilization with delta of 1 second
-func (top *SystemTopStruct) GetCPUUtil() error {
+//CalculateCPUUtil calculates CPU utilization with delta of 1 second
+func (top *SystemTopStruct) CalculateCPUUtil() error {
 	deltaTT, deltaIT := 0.0, 0.0
 	prevTT, prevIT := 0.0, 0.0
 
@@ -63,7 +62,7 @@ func (top *SystemTopStruct) GetCPUUtil() error {
 
 //RetriveInfo retrives all the system top info
 func (top *SystemTopStruct) RetriveInfo() error {
-	err := top.GetCPUUtil()
+	err := top.CalculateCPUUtil()
 	if err != nil {
 		log.Fatal(err.Error())
 		return err
