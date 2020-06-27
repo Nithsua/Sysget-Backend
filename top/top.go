@@ -25,8 +25,18 @@ func getProcData() ([]byte, error) {
 	return data, nil
 }
 
+//Reset is used to reset the value of the field in SystemTopStruct
+func (top *SystemTopStruct) Reset() {
+	top.cpuPackageUtil = CPUCoreTop{}
+	top.perCore = []CPUCoreTop{}
+	top.totalDiskSpace = 0
+	top.diskSpaceUsed = 0
+	top.diskSpaceFree = 0
+}
+
 //RetriveInfo retrives all the system top info
 func (top *SystemTopStruct) RetriveInfo() error {
+	top.Reset()
 	err := top.CalculateCPUUtil()
 	if err != nil {
 		log.Fatal(err.Error())
@@ -44,15 +54,17 @@ func (top *SystemTopStruct) RetriveInfo() error {
 func (top SystemTopStruct) GetTop() interface{} {
 	return struct {
 		CPUPackageUtil CPUCoreTop
+		PerCore        []CPUCoreTop
 		TotalDiskSpace uint64
 		DiskSpaceUsed  uint64
 		DiskSpaceFree  uint64
-	}{CPUPackageUtil: top.cpuPackageUtil, TotalDiskSpace: top.totalDiskSpace, DiskSpaceUsed: top.diskSpaceUsed, DiskSpaceFree: top.diskSpaceFree}
+	}{CPUPackageUtil: top.cpuPackageUtil, PerCore: top.perCore, TotalDiskSpace: top.totalDiskSpace, DiskSpaceUsed: top.diskSpaceUsed, DiskSpaceFree: top.diskSpaceFree}
 }
 
 //PrintData prints the content of the structure
 func (top SystemTopStruct) PrintData() {
-	fmt.Printf("CPU Utilization: %.2f %% \n", top.cpuPackageUtil.CoreUtil)
+	fmt.Printf("CPU Package Utilization: %.2f %% \n", top.cpuPackageUtil.CoreUtil)
+	fmt.Println("Per Core Utilization:", top.perCore)
 	fmt.Printf("Total Disk Space: %.2f MB\n", (float64(top.totalDiskSpace)/1024)/1024)
 	fmt.Printf("Disk Space used: %.2f MB\n", (float64(top.diskSpaceUsed)/1024)/1024)
 	fmt.Printf("Disk Space free: %.2f MB\n", (float64(top.diskSpaceFree)/1024)/1024)
