@@ -2,7 +2,7 @@ package top
 
 import (
 	"fmt"
-	"os"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -11,96 +11,86 @@ import (
 //CPUCoreTop is used to hold information per clock
 type CPUCoreTop struct {
 	CoreUtil float64
-	// TotalTime uint64
-	// IdleTime  uint64
 }
 
 //CalculateCPUUtil calculates CPU utilization with delta of 1 second
 func (top *SystemTopStruct) CalculateCPUUtil() error {
-	var deltaTT, deltaIT []float64
-	var prevTT, prevIT []float64
 	var totalTime, idleTime []int64
-
 	for i := 0; i < 2; i++ {
 		procData, err := getProcData()
 		if err != nil {
+			log.Fatal("")
 			return err
 		}
-		sysUtil := strings.Split(string(procData), "\n")
-
-		var cpuData []string
-
-		for i := 0; i < len(sysUtil); i++ {
-			if strings.Contains(sysUtil[i], "cpu") {
-				cpuData = append(cpuData, sysUtil[i])
-			}
-		}
-
-		for _, v := range cpuData {
-			fmt.Println(v)
-		}
-
-		for i := 0; i < len(cpuData); i++ {
-			prevTT = append(prevTT, 0.0)
-			prevIT = append(prevIT, 0.0)
-		}
-
-		for j := 0; j < len(cpuData); j++ {
-			tempTotalTime, tempIdleTime, err := calculateIdleAndTotalTime(cpuData[j])
+		stringProcData := strings.Split(string(procData), "\n")
+		top.cpuCoreCount = getCoreCount(stringProcData)
+		// fmt.Println(stringProcData)
+		for j := 0; j < top.cpuCoreCount+1; j++ {
+			tempTotalTime, tempIdleTime, err := calculateIdleAndTotalTime(stringProcData[j])
 			if err != nil {
-				os.Exit(1)
+				log.Fatal("")
+				return err
+			}
+			if i == 0 {
+				totalTime = append(totalTime, tempTotalTime)
+				idleTime = append(idleTime, tempIdleTime)
 			} else {
-				if i == 0 {
-					totalTime = append(totalTime, tempTotalTime)
-					idleTime = append(idleTime, tempIdleTime)
-					deltaTT = append(deltaTT, float64(totalTime[j])-prevTT[j])
-					deltaIT = append(deltaIT, float64(idleTime[j])-prevIT[j])
+				if j == 0 {
+					deltaTotalTime := tempTotalTime - totalTime[j]
+					deltaIdleTime := tempIdleTime - idleTime[j]
+					util, err := strconv.ParseFloat(fmt.Sprintf("%.2f", (1-(float64(deltaIdleTime)/float64(deltaTotalTime)))*100), 64)
+					if err != nil {
+						return err
+					}
+					top.cpuPackageUtil = CPUCoreTop{
+						CoreUtil: util,
+					}
 				} else {
-					totalTime[j] = tempTotalTime
-					idleTime[j] = tempIdleTime
-					deltaTT[j] = float64(totalTime[j]) - prevTT[j]
-					deltaIT[j] = float64(idleTime[j]) - prevIT[j]
+					deltaTotalTime := tempTotalTime - totalTime[j]
+					deltaIdleTime := tempIdleTime - idleTime[j]
+					util, err := strconv.ParseFloat(fmt.Sprintf("%.2f", (1-(float64(deltaIdleTime)/float64(deltaTotalTime)))*100), 64)
+					// fmt.Println(util)
+					if err != nil {
+						return err
+					}
+					top.perCore = append(top.perCore, CPUCoreTop{
+						CoreUtil: util,
+					})
 				}
 			}
-			prevIT = append(prevIT, float64(idleTime[j]))
-			prevTT = append(prevTT, float64(totalTime[j]))
 		}
 		time.Sleep(1 * time.Second)
 	}
-
-	for i := 0; i < len(deltaTT); i++ {
-		temp := fmt.Sprintf("%.2f", (1-(deltaIT[i]/deltaTT[i]))*100)
-		cpuUtil, err := strconv.ParseFloat(temp, 64)
-		if err != nil {
-			return err
-		}
-		if i == 0 {
-			top.cpuPackageUtil.CoreUtil = cpuUtil
-		} else {
-			temp := CPUCoreTop{CoreUtil: cpuUtil}
-			top.perCore = append(top.perCore, temp)
-		}
-	}
+	// fmt.Println(totalTime, idleTime)
 	return nil
 }
 
+func getCoreCount(stringProcData []string) int {
+	coreCount := -1
+	for _, v := range stringProcData {
+		if strings.Contains(v, "cpu") {
+			coreCount++
+		}
+	}
+	return coreCount
+}
+
 func calculateIdleAndTotalTime(cpuData string) (int64, int64, error) {
-	tempData := strings.Split(cpuData, " ")
-	// fmt.Println(cpuData)
+	tempData := strings.Fields(cpuData)
+	// fmt.Println(tempData)
 	totalTime := int64(0)
-	for i := 2; i < len(tempData); i++ {
+	for i := 1; i < len(tempData); i++ {
 		temp, err := strconv.ParseInt(tempData[i], 10, 64)
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Fatal(err.Error())
 			return 0, 0, err
 		}
 		totalTime += temp
 	}
 	// fmt.Println(tempData)
-	idleTime, err := strconv.ParseInt(tempData[5], 10, 64)
+	idleTime, err := strconv.ParseInt(tempData[4], 10, 64)
 	if err != nil {
 		return 0, 0, err
 	}
 	return totalTime, idleTime, nil
-
 }

@@ -9,6 +9,7 @@ import (
 //SystemTopStruct is used as structure for system usage info
 type SystemTopStruct struct {
 	cpuPackageUtil CPUCoreTop
+	cpuCoreCount   int
 	perCore        []CPUCoreTop
 	totalDiskSpace uint64
 	diskSpaceUsed  uint64
@@ -29,6 +30,7 @@ func getProcData() ([]byte, error) {
 func (top *SystemTopStruct) Reset() {
 	top.cpuPackageUtil = CPUCoreTop{}
 	top.perCore = []CPUCoreTop{}
+	top.cpuCoreCount = 0
 	top.totalDiskSpace = 0
 	top.diskSpaceUsed = 0
 	top.diskSpaceFree = 0
@@ -36,7 +38,6 @@ func (top *SystemTopStruct) Reset() {
 
 //RetriveInfo retrives all the system top info
 func (top *SystemTopStruct) RetriveInfo() error {
-	top.Reset()
 	err := top.CalculateCPUUtil()
 	if err != nil {
 		log.Fatal(err.Error())
@@ -55,10 +56,11 @@ func (top SystemTopStruct) GetTop() interface{} {
 	return struct {
 		CPUPackageUtil CPUCoreTop
 		PerCore        []CPUCoreTop
+		CPUCoreCount   int
 		TotalDiskSpace uint64
 		DiskSpaceUsed  uint64
 		DiskSpaceFree  uint64
-	}{CPUPackageUtil: top.cpuPackageUtil, PerCore: top.perCore, TotalDiskSpace: top.totalDiskSpace, DiskSpaceUsed: top.diskSpaceUsed, DiskSpaceFree: top.diskSpaceFree}
+	}{CPUPackageUtil: top.cpuPackageUtil, PerCore: top.perCore, CPUCoreCount: top.cpuCoreCount, TotalDiskSpace: top.totalDiskSpace, DiskSpaceUsed: top.diskSpaceUsed, DiskSpaceFree: top.diskSpaceFree}
 }
 
 //PrintData prints the content of the structure

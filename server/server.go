@@ -10,6 +10,7 @@ import (
 var topInfo top.SystemTopStruct
 
 func responseUtilData(w http.ResponseWriter, r *http.Request) {
+	topInfo.Reset()
 	err := topInfo.RetriveInfo()
 	// fmt.Println(topInfo.GetTop())
 	if err != nil {
