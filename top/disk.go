@@ -5,6 +5,13 @@ import (
 	"syscall"
 )
 
+//DiskTop ...
+type DiskTop struct {
+	TotalDiskSpace uint64
+	DiskSpaceUsed  uint64
+	DiskSpaceFree  uint64
+}
+
 //GetDiskUsage ...
 func (top *SystemTopStruct) GetDiskUsage() error {
 	var stat syscall.Statfs_t
@@ -13,8 +20,10 @@ func (top *SystemTopStruct) GetDiskUsage() error {
 		return err
 	}
 	syscall.Statfs(wd, &stat)
-	top.totalDiskSpace = stat.Blocks * uint64(stat.Bsize)
-	top.diskSpaceUsed = (stat.Blocks - stat.Bfree) * uint64(stat.Bsize)
-	top.diskSpaceFree = stat.Bfree * uint64(stat.Bsize)
+	top.diskList = append(top.diskList,
+		DiskTop{
+			TotalDiskSpace: stat.Blocks * uint64(stat.Bsize),
+			DiskSpaceUsed:  (stat.Blocks - stat.Bfree) * uint64(stat.Bsize),
+			DiskSpaceFree:  stat.Bfree * uint64(stat.Bsize)})
 	return nil
 }
