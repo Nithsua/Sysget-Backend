@@ -11,7 +11,7 @@ type SystemTopStruct struct {
 	cpuCoreCount   int
 	perCore        []CPUCoreTop
 	memory         Memory
-	diskList       []DiskTop
+	diskList       []DiskInfo
 }
 
 //Reset is used to reset the value of the field in SystemTopStruct
@@ -19,7 +19,7 @@ func (top *SystemTopStruct) Reset() {
 	top.cpuPackageUtil = CPUCoreTop{}
 	top.perCore = []CPUCoreTop{}
 	top.cpuCoreCount = 0
-	top.diskList = []DiskTop{}
+	top.diskList = []DiskInfo{}
 }
 
 //RetriveInfo retrives all the system top info
@@ -34,7 +34,7 @@ func (top *SystemTopStruct) RetriveInfo() error {
 		log.Fatal(err.Error())
 		return err
 	}
-	err = top.GetDiskUsage()
+	err = top.GetDiskData()
 	if err != nil {
 		log.Fatal(err.Error())
 		return err
@@ -49,7 +49,7 @@ func (top SystemTopStruct) GetTop() interface{} {
 		PerCore        []CPUCoreTop
 		CPUCoreCount   int
 		Memory         Memory
-		DiskList       []DiskTop
+		DiskList       []DiskInfo
 	}{CPUPackageUtil: top.cpuPackageUtil, PerCore: top.perCore, CPUCoreCount: top.cpuCoreCount,
 		DiskList: top.diskList, Memory: top.memory}
 }
