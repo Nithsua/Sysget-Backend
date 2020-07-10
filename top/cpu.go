@@ -2,6 +2,7 @@ package top
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"strconv"
 	"strings"
@@ -13,11 +14,21 @@ type CPUCoreTop struct {
 	CoreUtil float64
 }
 
+//getCPUProcData reads /proc/stat and returns total and idle time
+func getCPUProcData() ([]byte, error) {
+	data, err := ioutil.ReadFile("/proc/stat")
+	if err != nil {
+		log.Fatal("Error opening the stat", err.Error())
+		return data, err
+	}
+	return data, nil
+}
+
 //CalculateCPUUtil calculates CPU utilization with delta of 1 second
 func (top *SystemTopStruct) CalculateCPUUtil() error {
 	var totalTime, idleTime []int64
 	for i := 0; i < 2; i++ {
-		procData, err := getProcData()
+		procData, err := getCPUProcData()
 		if err != nil {
 			log.Fatal("")
 			return err
@@ -49,7 +60,6 @@ func (top *SystemTopStruct) CalculateCPUUtil() error {
 					deltaTotalTime := tempTotalTime - totalTime[j]
 					deltaIdleTime := tempIdleTime - idleTime[j]
 					util, err := strconv.ParseFloat(fmt.Sprintf("%.2f", (1-(float64(deltaIdleTime)/float64(deltaTotalTime)))*100), 64)
-					// fmt.Println(util)
 					if err != nil {
 						return err
 					}

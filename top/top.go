@@ -2,7 +2,6 @@ package top
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 )
 
@@ -11,17 +10,8 @@ type SystemTopStruct struct {
 	cpuPackageUtil CPUCoreTop
 	cpuCoreCount   int
 	perCore        []CPUCoreTop
+	memory         Memory
 	diskList       []DiskTop
-}
-
-//getProcData reads /proc/stat and returns total and idle time
-func getProcData() ([]byte, error) {
-	data, err := ioutil.ReadFile("/proc/stat")
-	if err != nil {
-		log.Fatal("Error opening the stat", err.Error())
-		return data, err
-	}
-	return data, nil
 }
 
 //Reset is used to reset the value of the field in SystemTopStruct
@@ -35,6 +25,11 @@ func (top *SystemTopStruct) Reset() {
 //RetriveInfo retrives all the system top info
 func (top *SystemTopStruct) RetriveInfo() error {
 	err := top.CalculateCPUUtil()
+	if err != nil {
+		log.Fatal(err.Error())
+		return err
+	}
+	err = top.GetMemoryInfo()
 	if err != nil {
 		log.Fatal(err.Error())
 		return err
@@ -53,13 +48,22 @@ func (top SystemTopStruct) GetTop() interface{} {
 		CPUPackageUtil CPUCoreTop
 		PerCore        []CPUCoreTop
 		CPUCoreCount   int
+		Memory         Memory
 		DiskList       []DiskTop
-	}{CPUPackageUtil: top.cpuPackageUtil, PerCore: top.perCore, CPUCoreCount: top.cpuCoreCount, DiskList: top.diskList}
+	}{CPUPackageUtil: top.cpuPackageUtil, PerCore: top.perCore, CPUCoreCount: top.cpuCoreCount,
+		DiskList: top.diskList, Memory: top.memory}
 }
 
 //PrintData prints the content of the structure
 func (top SystemTopStruct) PrintData() {
 	fmt.Printf("CPU Package Utilization: %.2f %% \n", top.cpuPackageUtil.CoreUtil)
 	fmt.Println("Per Core Utilization:", top.perCore)
-	fmt.Println("Disk Info: ", top.diskList)
+	fmt.Println("Memory Info:")
+	fmt.Println("Total Memory:", top.memory.MemTotal)
+	fmt.Println("Memory Available:", top.memory.MemAvail)
+	fmt.Println("Memory Free:", top.memory.MemFree)
+	fmt.Println("Disk Info:")
+	fmt.Println("Total Disk Space: ", top.diskList[0].TotalDiskSpace)
+	fmt.Println("Disk Space Used: ", top.diskList[0].DiskSpaceUsed)
+	fmt.Println("Disk Space Free:", top.diskList[0].DiskSpaceFree)
 }
