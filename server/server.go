@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -13,15 +12,12 @@ var topInfo top.SystemTopStruct
 func responseUtilData(w http.ResponseWriter, r *http.Request) {
 	topInfo.Reset()
 	err := topInfo.RetriveInfo()
-	// fmt.Println(topInfo)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
 		topInfo.PrintData()
 		temp := topInfo.GetTop()
-		fmt.Println(temp)
 		bytes, err := top.FormatData(temp)
-		fmt.Println(string(bytes))
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Fatal(err.Error())
