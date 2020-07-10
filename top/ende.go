@@ -8,5 +8,6 @@ func FormatData(top interface{}) ([]byte, error) {
 	if err != nil {
 		return jsonData, err
 	}
+	jsonData = append(jsonData, byte('\n'))
 	return jsonData, nil
 }
