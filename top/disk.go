@@ -1,7 +1,11 @@
 package top
 
 import (
+	"io/ioutil"
+	"log"
 	"os"
+	"regexp"
+	"strings"
 	"syscall"
 )
 
@@ -12,6 +16,28 @@ type DiskInfo struct {
 	TotalDiskSpace uint64
 	DiskSpaceUsed  uint64
 	DiskSpaceFree  uint64
+}
+
+func getPartitionData() ([]byte, error) {
+	tempData, err := ioutil.ReadFile("/proc/partitions")
+	var unFormattedDiskList []string
+	if err != nil {
+		log.Fatal(err.Error())
+		return tempData, err
+	}
+	tempList := strings.Split(string(tempData), "\n")
+	for _, v := range tempList {
+		decision, err := regexp.MatchString(`sd[a-z]$`, v)
+		if err != nil {
+			log.Fatal(err.Error())
+		} else {
+			if decision {
+				unFormattedDiskList = append(unFormattedDiskList, v)
+			}
+		}
+	}
+
+	return _, nil
 }
 
 //GetDiskData ...
