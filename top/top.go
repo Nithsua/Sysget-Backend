@@ -31,11 +31,11 @@ func (top *Top) RetriveInfo() error {
 		log.Fatal(err.Error())
 		return err
 	}
-	err = top.GetDiskInfo()
-	if err != nil {
-		log.Fatal(err.Error())
-		return err
-	}
+	// err = top.GetDiskInfo()
+	// if err != nil {
+	// 	log.Fatal(err.Error())
+	// 	return err
+	// }
 	return nil
 }
 
