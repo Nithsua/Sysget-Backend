@@ -7,7 +7,7 @@ import (
 	"github.com/austinmarner/system_admin_backend/top"
 )
 
-var topInfo top.SystemTopStruct
+var topInfo top.Top
 
 func responseUtilData(w http.ResponseWriter, r *http.Request) {
 	topInfo.Reset()
@@ -15,7 +15,7 @@ func responseUtilData(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
-		topInfo.PrintData()
+		// topInfo.PrintData()
 		temp := topInfo.GetTop()
 		bytes, err := top.FormatData(temp)
 		if err != nil {
@@ -29,7 +29,7 @@ func responseUtilData(w http.ResponseWriter, r *http.Request) {
 }
 
 //InitiateServer ...
-func InitiateServer(topInfo top.SystemTopStruct) {
+func InitiateServer(topInfo top.Top) {
 	http.HandleFunc("/topData", responseUtilData)
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {

@@ -9,9 +9,24 @@ import (
 	"time"
 )
 
+//CPUTop ...
+type CPUTop struct {
+	CPUPackageUtil  CPUCoreTop
+	PerCoreUtil     []CPUCoreTop
+	HyperThreading  bool
+	CPUCoreCount    int
+	ThreadCount     int
+	BaseClock       float64
+	BoostClockAvail bool
+	BoostClock      float64
+	LevelsofCache   int
+	Cache           []int64
+}
+
 //CPUCoreTop is used to hold information per clock
 type CPUCoreTop struct {
-	CoreUtil float64
+	CoreUtil         float64
+	CurrentFrequency float64
 }
 
 //getCPUProcData reads /proc/stat and returns total and idle time
@@ -25,7 +40,7 @@ func getCPUProcData() ([]byte, error) {
 }
 
 //CalculateCPUUtil calculates CPU utilization with delta of 1 second
-func (top *SystemTopStruct) CalculateCPUUtil() error {
+func (top *Top) CalculateCPUUtil() error {
 	var totalTime, idleTime []int64
 	for i := 0; i < 2; i++ {
 		procData, err := getCPUProcData()
@@ -34,9 +49,9 @@ func (top *SystemTopStruct) CalculateCPUUtil() error {
 			return err
 		}
 		stringProcData := strings.Split(string(procData), "\n")
-		top.cpuCoreCount = getCoreCount(stringProcData)
+		top.cpuTop.CPUCoreCount = getCoreCount(stringProcData)
 		// fmt.Println(stringProcData)
-		for j := 0; j < top.cpuCoreCount+1; j++ {
+		for j := 0; j < top.cpuTop.CPUCoreCount+1; j++ {
 			tempTotalTime, tempIdleTime, err := calculateIdleAndTotalTime(stringProcData[j])
 			if err != nil {
 				log.Fatal("")
@@ -53,7 +68,7 @@ func (top *SystemTopStruct) CalculateCPUUtil() error {
 					if err != nil {
 						return err
 					}
-					top.cpuPackageUtil = CPUCoreTop{
+					top.cpuTop.CPUPackageUtil = CPUCoreTop{
 						CoreUtil: util,
 					}
 				} else {
@@ -63,7 +78,7 @@ func (top *SystemTopStruct) CalculateCPUUtil() error {
 					if err != nil {
 						return err
 					}
-					top.perCore = append(top.perCore, CPUCoreTop{
+					top.cpuTop.PerCoreUtil = append(top.cpuTop.PerCoreUtil, CPUCoreTop{
 						CoreUtil: util,
 					})
 				}

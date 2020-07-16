@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-//Memory ...
-type Memory struct {
+//MemoryTop ...
+type MemoryTop struct {
 	MemTotal     int64
 	MemFree      int64
 	MemAvail     int64
@@ -42,8 +42,8 @@ func getMemoryProcData() ([]byte, error) {
 }
 
 //GetMemoryInfo ...
-func (top *SystemTopStruct) GetMemoryInfo() error {
-	tempMemory := Memory{}
+func (top *Top) GetMemoryInfo() error {
+	tempMemory := MemoryTop{}
 	temp, err := getMemoryProcData()
 	tempString := string(temp)
 	if err != nil {
@@ -108,6 +108,6 @@ func (top *SystemTopStruct) GetMemoryInfo() error {
 			tempMemory.SharedMem = temp
 		}
 	}
-	top.memory = tempMemory
+	top.memoryTop = tempMemory
 	return nil
 }
