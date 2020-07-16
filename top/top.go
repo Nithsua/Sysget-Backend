@@ -41,7 +41,6 @@ func (top *Top) RetriveInfo() error {
 
 //GetTop returns the entire structure
 func (top *Top) GetTop() interface{} {
-	fmt.Println(top)
 	return struct {
 		CPUTop    CPUTop
 		MemoryTop MemoryTop
