@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/austinmarner/system_admin_backend/server"
-	"github.com/austinmarner/system_admin_backend/top"
+	"github.com/austinmarner/sysget/server"
+	"github.com/austinmarner/sysget/top"
 )
 
 var topInfo top.Top

@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/austinmarner/system_admin_backend/top"
+	"github.com/austinmarner/sysget/top"
 )
 
 var topInfo top.Top
