@@ -1,3 +1,3 @@
-module github.com/austinmarner/system_admin_backend
+module github.com/austinmarner/sysget
 
 go 1.13
